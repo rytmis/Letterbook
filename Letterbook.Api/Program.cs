@@ -35,7 +35,7 @@ public class Program
                 // Configure OpenIddict to use the Entity Framework Core stores and models.
                 // Note: call ReplaceDefaultEntities() to replace the default entities.
                 options.UseEntityFrameworkCore()
-                    .UseDbContext<TransactionalContext>();
+                    .UseDbContext<RelationalContext>();
             })
             .AddServer(options =>
             {
@@ -79,7 +79,7 @@ public class Program
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
-        builder.Services.AddDbContext<TransactionalContext>();
+        builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
         
         // TODO: Move to db adapter

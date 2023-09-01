@@ -6,12 +6,12 @@ namespace Letterbook.Adapter.Db;
 /// <summary>
 /// This class is only used by EFCore design tools, to generate migrations 
 /// </summary>
-public class TransactionalContextFactory : IDesignTimeDbContextFactory<TransactionalContext>
+public class TransactionalContextFactory : IDesignTimeDbContextFactory<RelationalContext>
 {
-    public TransactionalContext CreateDbContext(string[] args)
+    public RelationalContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<TransactionalContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<RelationalContext>();
 
-        return new TransactionalContext(optionsBuilder.Options);
+        return new RelationalContext(optionsBuilder.Options);
     }
 }
