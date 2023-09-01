@@ -1,5 +1,8 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
@@ -17,6 +20,10 @@ public class Program
         builder.Services.AddControllers(options =>
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
+        }).AddJsonOptions(opts =>
+        {
+            opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
         
         // Register OIDC
@@ -73,6 +80,7 @@ public class Program
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
         builder.Services.AddDbContext<TransactionalContext>();
+        builder.Services.AddDbContext<FeedsContext>();
         
         // TODO: Move to db adapter
         // services.AddDbContext<ApplicationDbContext>(options =>
@@ -107,7 +115,6 @@ public class Program
         app.UseAuthorization();
         
         app.UsePathBase(new PathString("/api/v1"));
-
 
         app.MapControllers();
 
