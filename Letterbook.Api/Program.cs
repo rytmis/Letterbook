@@ -6,6 +6,8 @@ using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using OpenIddict.Validation.AspNetCore;
 
@@ -83,6 +85,9 @@ public class Program
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
         builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
+        builder.Services.AddIdentity<AccountAuthentication, IdentityRole>()
+            .AddUserManager<AccountAuthentication>()
+            .AddSignInManager<AccountAuthentication>();
         
         // TODO: Move to db adapter
         // services.AddDbContext<ApplicationDbContext>(options =>

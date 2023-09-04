@@ -7,7 +7,7 @@ public class Account
 {
     public string Id { get; set; }
     public string Email { get; set; }
-    public IdentityUser AccountIdentity { get; set; }
+    public AccountAuthentication Authentication { get; set; }
     public ICollection<LinkedProfile> LinkedProfiles { get; set; } = new HashSet<LinkedProfile>();
     
     // In the future, Account might tie in to things like organizations or billing accounts
@@ -16,19 +16,21 @@ public class Account
     {
         Id = default!;
         Email = default!;
+        Authentication = default!;
     }
 
-    private Account(string email) : this()
+    private Account(string email, string handle) : this()
     {
         Id = ShortId.NewShortId();
         Email = email;
+        Authentication = new AccountAuthentication(this, email, handle);
     }
 
     // TODO(Account creation): https://github.com/Letterbook/Letterbook/issues/32
     public static Account CreateAccount(Uri baseUri, string email, string handle)
     {
         var profile = Profile.CreatePerson(baseUri, handle);
-        var account = new Account(email);
+        var account = new Account(email, handle);
         profile.OwnedBy = account;
         account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
 
