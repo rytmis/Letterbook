@@ -1,6 +1,7 @@
 ﻿using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,19 +13,23 @@ public class AccountService : IAccountService
     private readonly CoreOptions _opts;
     private readonly IAccountProfileAdapter _accountAdapter;
     private readonly IAccountEventService _eventService;
+    private readonly UserManager<IdentityUser> _userManager;
+    private readonly SignInManager<IdentityUser> _signInManager;
 
     public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
-        IAccountProfileAdapter accountAdapter, IAccountEventService eventService)
+        IAccountProfileAdapter accountAdapter, IAccountEventService eventService, UserManager<IdentityUser> userManager,
+        SignInManager<IdentityUser> signInManager)
     {
         _logger = logger;
         _opts = options.Value;
         _accountAdapter = accountAdapter;
         _eventService = eventService;
+        _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     public Account? RegisterAccount(string email, string handle)
     {
-        // Fun fact, Uri will collapse the port number out of the string if it's the default for the scheme
         var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
 

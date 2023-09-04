@@ -7,6 +7,7 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using OpenIddict.Validation.AspNetCore;
 
 namespace Letterbook.Api;
 
@@ -25,6 +26,8 @@ public class Program
             opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
+
+        builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         
         // Register OIDC
         builder.Services.AddOpenIddict()
@@ -43,7 +46,6 @@ public class Program
                 options.SetTokenEndpointUris("connect/token");
 
                 // Enable the client credentials flow.
-                options.AllowClientCredentialsFlow();
                 options.AllowAuthorizationCodeFlow();
 
                 // Register the signing and encryption credentials.

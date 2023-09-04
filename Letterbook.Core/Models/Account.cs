@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Extensions;
+using Microsoft.AspNetCore.Identity;
 
 namespace Letterbook.Core.Models;
 
@@ -6,9 +7,7 @@ public class Account
 {
     public string Id { get; set; }
     public string Email { get; set; }
-    // TODO(Authentication): https://github.com/Letterbook/Letterbook/issues/35
-    // PasswordHash?
-    // 2FA stuff?
+    public IdentityUser AccountIdentity { get; set; }
     public ICollection<LinkedProfile> LinkedProfiles { get; set; } = new HashSet<LinkedProfile>();
     
     // In the future, Account might tie in to things like organizations or billing accounts
