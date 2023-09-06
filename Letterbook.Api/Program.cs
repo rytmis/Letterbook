@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Letterbook.Adapter.Db;
@@ -7,8 +8,14 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenIddict.Validation.AspNetCore;
 
 namespace Letterbook.Api;
@@ -32,40 +39,40 @@ public class Program
         builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         
         // Register OIDC
-        builder.Services.AddOpenIddict()
-
-            // Register the OpenIddict core components.
-            .AddCore(options =>
-            {
-                // Configure OpenIddict to use the Entity Framework Core stores and models.
-                // Note: call ReplaceDefaultEntities() to replace the default entities.
-                options.UseEntityFrameworkCore()
-                    .UseDbContext<RelationalContext>();
-            })
-            .AddServer(options =>
-            {
-                // Enable the token endpoint.
-                options.SetTokenEndpointUris("connect/token");
-
-                // Enable the client credentials flow.
-                options.AllowAuthorizationCodeFlow();
-
-                // Register the signing and encryption credentials.
-                options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
-
-                // Register the ASP.NET Core host and configure the ASP.NET Core options.
-                options.UseAspNetCore()
-                    .EnableTokenEndpointPassthrough();
-            })
-            .AddValidation(options =>
-            {
-                // Import the configuration from the local OpenIddict server instance.
-                options.UseLocalServer();
-
-                // Register the ASP.NET Core host.
-                options.UseAspNetCore();
-            });
+        // builder.Services.AddOpenIddict()
+        //
+        //     // Register the OpenIddict core components.
+        //     .AddCore(options =>
+        //     {
+        //         // Configure OpenIddict to use the Entity Framework Core stores and models.
+        //         // Note: call ReplaceDefaultEntities() to replace the default entities.
+        //         options.UseEntityFrameworkCore()
+        //             .UseDbContext<RelationalContext>();
+        //     })
+        //     .AddServer(options =>
+        //     {
+        //         // Enable the token endpoint.
+        //         options.SetTokenEndpointUris("connect/token");
+        //
+        //         // Enable the client credentials flow.
+        //         options.AllowAuthorizationCodeFlow();
+        //
+        //         // Register the signing and encryption credentials.
+        //         options.AddDevelopmentEncryptionCertificate()
+        //             .AddDevelopmentSigningCertificate();
+        //
+        //         // Register the ASP.NET Core host and configure the ASP.NET Core options.
+        //         options.UseAspNetCore()
+        //             .EnableTokenEndpointPassthrough();
+        //     })
+        //     .AddValidation(options =>
+        //     {
+        //         // Import the configuration from the local OpenIddict server instance.
+        //         options.UseLocalServer();
+        //
+        //         // Register the ASP.NET Core host.
+        //         options.UseAspNetCore();
+        //     });
         
         // Register config
         var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey);
@@ -85,9 +92,8 @@ public class Program
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
         builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
-        builder.Services.AddIdentity<AccountAuthentication, IdentityRole>()
-            .AddUserManager<AccountAuthentication>()
-            .AddSignInManager<AccountAuthentication>();
+        builder.Services.AddIdentity<AccountAuthentication, IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<RelationalContext>();
         
         // TODO: Move to db adapter
         // services.AddDbContext<ApplicationDbContext>(options =>

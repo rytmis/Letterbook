@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Letterbook.Core;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,7 @@ namespace Letterbook.Api.Controllers;
 public class AuthorizationController : Controller
 {
     private readonly IOpenIddictApplicationManager _applicationManager;
+    private readonly AccountService _accountService;
 
     public AuthorizationController(IOpenIddictApplicationManager applicationManager)
     {

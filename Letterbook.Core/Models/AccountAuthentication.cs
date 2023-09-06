@@ -4,7 +4,7 @@ namespace Letterbook.Core.Models;
 
 public class AccountAuthentication : IdentityUser<Guid>
 {
-    private Account Account { get; set; }
+    public Account Account { get; set; }
 
     private AccountAuthentication()
     {

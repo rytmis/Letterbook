@@ -1,4 +1,6 @@
-﻿using Letterbook.Core.Adapters;
+﻿using System.Security.Claims;
+using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -7,25 +9,51 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class AccountService : IAccountService
+public class AccountService : IAccountService, IDisposable
 {
     private readonly ILogger<AccountService> _logger;
     private readonly CoreOptions _opts;
     private readonly IAccountProfileAdapter _accountAdapter;
     private readonly IAccountEventService _eventService;
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly UserManager<AccountAuthentication> _userManager;
 
     public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
-        IAccountProfileAdapter accountAdapter, IAccountEventService eventService, UserManager<IdentityUser> userManager,
-        SignInManager<IdentityUser> signInManager)
+        IAccountProfileAdapter accountAdapter, IAccountEventService eventService,
+        UserManager<AccountAuthentication> userManager)
     {
         _logger = logger;
         _opts = options.Value;
         _accountAdapter = accountAdapter;
         _eventService = eventService;
         _userManager = userManager;
-        _signInManager = signInManager;
+    }
+
+    public async Task<ClaimsIdentity?> AuthenticatePassword(string email, string password)
+    {
+        var accountAuth = await _userManager.FindByEmailAsync(email);
+        if (accountAuth == null) return null;
+        if (accountAuth.LockoutEnd >= DateTime.UtcNow)
+        {
+            throw new RateLimitException("Too many failed attempts", accountAuth.LockoutEnd.GetValueOrDefault());
+        }
+
+        var match = _userManager.PasswordHasher.VerifyHashedPassword(accountAuth,
+            accountAuth.PasswordHash ?? string.Empty, password);
+        switch (match)
+        {
+            case PasswordVerificationResult.SuccessRehashNeeded:
+                await _userManager.ResetAccessFailedCountAsync(accountAuth);
+                accountAuth.PasswordHash = _userManager.PasswordHasher.HashPassword(accountAuth, password);
+                return new ClaimsIdentity(await _userManager.GetClaimsAsync(accountAuth));
+            case PasswordVerificationResult.Success:
+                await _userManager.ResetAccessFailedCountAsync(accountAuth);
+                return new ClaimsIdentity(await _userManager.GetClaimsAsync(accountAuth));
+            case PasswordVerificationResult.Failed:
+            default:
+                await _userManager.AccessFailedAsync(accountAuth);
+                _logger.LogInformation("Password Authentication failed for {AccountId}", accountAuth.Account.Id);
+                return default;
+        }
     }
 
     public Account? RegisterAccount(string email, string handle)
@@ -108,5 +136,11 @@ public class AccountService : IAccountService
         var link = new LinkedProfile(account, profile, ProfilePermission.None);
 
         return profile.RelatedAccounts.Remove(link) && account.LinkedProfiles.Remove(link);
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _userManager.Dispose();
     }
 }
