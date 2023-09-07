@@ -15,11 +15,11 @@ public class AccountService : IAccountService, IDisposable
     private readonly CoreOptions _opts;
     private readonly IAccountProfileAdapter _accountAdapter;
     private readonly IAccountEventService _eventService;
-    private readonly UserManager<AccountAuthentication> _userManager;
+    private readonly UserManager<AccountIdentity> _userManager;
 
     public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
         IAccountProfileAdapter accountAdapter, IAccountEventService eventService,
-        UserManager<AccountAuthentication> userManager)
+        UserManager<AccountIdentity> userManager)
     {
         _logger = logger;
         _opts = options.Value;

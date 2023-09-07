@@ -2,16 +2,16 @@
 
 namespace Letterbook.Core.Models;
 
-public class AccountAuthentication : IdentityUser<Guid>
+public class AccountIdentity : IdentityUser<Guid>
 {
     public Account Account { get; set; }
 
-    private AccountAuthentication()
+    private AccountIdentity()
     {
         Account = default!;
     }
 
-    public AccountAuthentication(Account account, string email, string? username)
+    public AccountIdentity(Account account, string email, string? username)
     {
         Account = account;
         base.Email = email;

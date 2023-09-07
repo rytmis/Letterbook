@@ -92,7 +92,7 @@ public class Program
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
         builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
-        builder.Services.AddIdentity<AccountAuthentication, IdentityRole<Guid>>()
+        builder.Services.AddIdentity<AccountIdentity, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<RelationalContext>();
         
         // TODO: Move to db adapter
