@@ -2,12 +2,9 @@
 using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
-using Letterbook.Core.Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenIddict.Validation.AspNetCore;
 
 namespace Letterbook.Api.Controllers;
 
@@ -32,8 +29,7 @@ public class UserAccountController : ControllerBase
             if (identity == null) return Unauthorized();
 
             var principal = new ClaimsPrincipal(identity);
-            // Scheme? Need a scheme. What scheme is this?
-            return SignIn(principal);
+            return SignIn(principal, JwtBearerDefaults.AuthenticationScheme);
         }
         catch (RateLimitException e)
         {
@@ -42,12 +38,13 @@ public class UserAccountController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize]
     public IActionResult Logout()
     {
         var controller = nameof(Logout);
         _logger.LogInformation("{Controller}", controller);
-     
-        throw new NotImplementedException();
+
+        return SignOut();
     }
     
     [HttpPost]
