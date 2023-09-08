@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class TransactionalContextModelSnapshot : ModelSnapshot
+    partial class RelationalContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -116,9 +116,73 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("IdentityId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("IdentityId");
+
                     b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.AccountIdentity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AccountId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.ToTable("AccountIdentity");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
@@ -568,6 +632,26 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Follows");
 
                     b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.AccountIdentity", "Identity")
+                        .WithMany()
+                        .HasForeignKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Identity");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.AccountIdentity", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Account", "Account")
+                        .WithOne()
+                        .HasForeignKey("Letterbook.Core.Models.AccountIdentity", "AccountId");
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
